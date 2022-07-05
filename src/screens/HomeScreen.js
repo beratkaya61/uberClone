@@ -1,4 +1,10 @@
-import React, { useRef } from 'react'
+import React, {
+    useEffect,
+    useRef,
+    useState,
+    useContext,
+} from 'react'
+
 import {
     StyleSheet,
     Text,
@@ -6,25 +12,81 @@ import {
     ScrollView,
     TouchableOpacity,
     Image,
-    FlatList
+    FlatList,
+    LogBox
 } from 'react-native'
+
 import { StatusBar } from 'expo-status-bar'
 import { Icon } from 'react-native-elements'
 import MapView, { PROVIDER_GOOGLE, } from 'react-native-maps';
+import * as Location from 'expo-location';
 import { colors, parameters } from '../global/styles'
 import { mapStyle } from '../global/mapStyle'
 import { filterData, visitedLocations, carsAround } from '../global/data'
+import { CurrentLocationContext } from '../contexts/context';
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }) => {
 
     const _map = useRef(1);
+
+    const [latlng, setLatLng] = useState(null)
+    const { currentLocation, currentLocationDispatch } = useContext(CurrentLocationContext);
+
+
+    const checkPermission = async () => {
+        const hasPermission = await Location.requestForegroundPermissionsAsync();
+        if (hasPermission.status === 'granted') {
+            const permission = await askPermission();
+            return permission
+        }
+        return true
+    };
+
+    const askPermission = async () => {
+        const permission = await Location.requestForegroundPermissionsAsync()
+        return permission.status === 'granted';
+    };
+
+    const getLocation = async () => {
+        try {
+            const { granted } = await Location.requestForegroundPermissionsAsync();
+            if (!granted) return;
+            const {
+                coords: { latitude, longitude },
+            } = await Location.getCurrentPositionAsync();
+
+            currentLocationDispatch({
+                type: 'SET_CURRENT_LOCATION',
+                payload: {
+                    latitude,
+                    longitude,
+                    address: null,
+                    name: null,
+                },
+            });
+
+            setLatLng({ latitude: latitude, longitude: longitude })
+
+        } catch (err) {
+            console.log('error while getting location', err);
+        }
+    }
+
+    useEffect(() => {
+        LogBox.ignoreLogs(["VirtualizedLists should never be nested"])
+        checkPermission();
+        getLocation()
+        console.log('currentLocation context state : ', currentLocation)
+    }, [])
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <View style={styles.headerIcon}>
+                <TouchableOpacity
+                    onPress={() => navigation.openDrawer()}
+                    style={styles.headerIcon}>
                     <Icon name="menu" size={30} color={colors.white} />
-                </View>
+                </TouchableOpacity>
             </View>
             <StatusBar backgroundColor='#2058c0' translucent={true} />
             <ScrollView indicatorStyle='white' bounces={false}>
@@ -36,7 +98,7 @@ const HomeScreen = () => {
                             <Text style={styles.explanationBodyText}>Read a book.Take a nap. Stare out the window</Text>
                             <TouchableOpacity
                                 style={styles.explanationBodyButton}
-                                onPress={() => { navigation.navigate("RequestScreen", { state: 0 }) }}>
+                                onPress={() => { navigation.navigate("Request", { state: 0 }) }}>
                                 <Text style={styles.button1Text}>Ride with Uber</Text>
                             </TouchableOpacity>
                         </View>
@@ -150,7 +212,6 @@ const HomeScreen = () => {
                         )}
                     </MapView>
                 </View>
-
             </ScrollView>
         </View>
     )
@@ -163,7 +224,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.white,
         paddingBottom: 30,
-        //paddingTop: parameters.statusBarHeight
+        paddingTop: parameters.statusBarHeight
     },
     header: {
         backgroundColor: colors.blue,
@@ -285,11 +346,11 @@ const styles = StyleSheet.create({
     },
     mapContainer: {
         alignItems: 'center',
-        justifyContent:'center',
+        justifyContent: 'center',
         marginBottom: 100,
     },
     map: {
-        height: 150,
+        height: 200,
         width: parameters.SCREEN_WIDTH * 0.92
     },
     headerIcon: {

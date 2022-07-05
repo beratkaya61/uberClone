@@ -1,3 +1,5 @@
+export const GOOGLE_MAPS_APIKEY = "AIzaSyAdJaAuoPFab5fGbrmwcMuUbjaDIQgtrc0"
+
 export const filterData = [
     { name: "Ride", image: require('../../assets/ride.png'), id: "0" },
     { name: "Food", image: require("../../assets/food.png"), id: "1" },
