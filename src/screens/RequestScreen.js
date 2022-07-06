@@ -23,7 +23,7 @@ import { rideData } from '../global/data';
 import { CurrentLocationContext, DestinationLocationContext } from '../contexts/context';
 
 
-const RequestScreen = ({ props, route, navigation }) => {
+const RequestScreen = ({ route, navigation }) => {
 
     const bottomSheetRef = useRef(null);
     const snapPoints = useMemo(() => ['70%'], []);
@@ -47,8 +47,6 @@ const RequestScreen = ({ props, route, navigation }) => {
         latitude: currentLocation.latitude,
         longitude: currentLocation.longitude,
     });
-
-    console.log('userCurrentLocation in request screen : ', userCurrentLocation);
 
     const [userDestionationLocation, setUserDestionationLocation] = useState({
         latitude: destinationLocation.latitude,
@@ -202,7 +200,7 @@ const RequestScreen = ({ props, route, navigation }) => {
                         <Icon
                             type="material-community"
                             name="arrow-left"
-                            color={colors.grey3}
+                            color={colors.grey1}
                             size={30}
                         />
                     </TouchableOpacity>
@@ -230,8 +228,8 @@ const RequestScreen = ({ props, route, navigation }) => {
                     <View>
                         <TouchableOpacity
                             style={styles.fromWhereContainer}
-                            onPress={() => navigation.navigate("DestinationScreen")}>
-                            <Text style={styles.fromWhereText}>From where</Text>
+                            onPress={() => navigation.navigate("Destination")}>
+                            <Text style={styles.fromWhereText}>{currentLocation.address ? currentLocation.address : 'From where'}</Text>
                         </TouchableOpacity>
 
                         <View style={{
@@ -245,10 +243,11 @@ const RequestScreen = ({ props, route, navigation }) => {
                                 justifyContent: "center",
                                 marginTop: 10,
                             }}>
-                                <Text style={{
-                                    color: colors.grey2,
-                                    paddingLeft: 10
-                                }}>...</Text>
+                                <Text
+                                    style={{
+                                        color: colors.grey2,
+                                        paddingLeft: 10
+                                    }}>{destinationLocation.address ? destinationLocation.address : '...'}</Text>
                             </TouchableOpacity>
                             <Icon
                                 style={{ marginLeft: 10 }}
@@ -279,7 +278,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.white,
-        paddingTop: parameters.statusBarHeight * 1.5,
     },
     locationHeader: {
         height: parameters.SCREEN_HEIGHT * 0.21,

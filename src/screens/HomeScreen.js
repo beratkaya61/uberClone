@@ -76,7 +76,6 @@ const HomeScreen = ({ navigation }) => {
         LogBox.ignoreLogs(["VirtualizedLists should never be nested"])
         checkPermission();
         getLocation()
-        console.log('currentLocation context state : ', currentLocation)
     }, [])
 
     return (
@@ -224,7 +223,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.white,
         paddingBottom: 30,
-        paddingTop: parameters.statusBarHeight
     },
     header: {
         backgroundColor: colors.blue,

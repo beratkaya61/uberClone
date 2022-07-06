@@ -1,76 +1,183 @@
-import React, { useRef } from 'react'
-import { Image, StyleSheet, Text, View } from 'react-native'
-import MapView, { PROVIDER_GOOGLE, } from 'react-native-maps';
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Icon } from 'react-native-elements';
+import MapView, { PROVIDER_GOOGLE, Animated, AnimatedRegion } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { GOOGLE_MAPS_APIKEY } from '../global/data';
 import { mapStyle } from '../global/mapStyle';
-import { colors } from '../global/styles';
+import { colors, parameters } from '../global/styles';
 
 
 const MapComponent = (props) => {
 
     const _map = useRef(1);
 
-    console.log('MapComponent props origin: ', props.userOrigin);
-    
+    const { userOrigin: origin, userDestination: destination } = props;
+    const [latitudeDelta, setLatitudeDelta] = useState(0.00522);
+    const [longitudeDelta, setLongitudeDelta] = useState(parameters.SCREEN_WIDTH / parameters.SCREEN_HEIGHT * 0.00522);
+    console.log('MapComponent props origin ', origin)
+    console.log('MapComponent props destination ', destination)
 
-    const origin = props.userOrigin;
-    const destination = { latitude: 42.2929175, longitude: -71.0548235 };
+    // const ASPECT_RATIO = parameters.SCREEN_WIDTH / parameters.SCREEN_HEIGHT
+    // const LATITUDE_DELTA = 60 //Very high zoom level
+    // const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO
+
+    // const showMarkers = (region) => {
+    //     let zoom = Math.round(Math.log(360 / region.longitudeDelta) / Math.LN2)
+    //     return zoom
+    // }
+
+    useEffect(() => {
+        setLatitudeDelta(0.00522);
+        setLongitudeDelta(parameters.SCREEN_WIDTH / parameters.SCREEN_HEIGHT * 0.00522);
+    }, [])
+
+    const onMapReadyHandler = useCallback(() => {
+
+        if (destination.latitude !== null) {
+            setTimeout(() => {
+                _map?.current?.fitToCoordinates([origin, destination], {
+                    edgePadding: { top: 450, right: 50, left: 50, bottom: 350 },
+                    animated: true
+                });
+            }, 1000)
+        }
+    }, [destination]);
+
+    const onPressZoomIn = useCallback(() => {
+
+        // setLatitudeDelta(latitudeDelta + 0.00522);
+        // setLongitudeDelta(longitudeDelta + parameters.SCREEN_WIDTH / parameters.SCREEN_HEIGHT * 0.00522);
+
+        // _map?.current?.animateToRegion({
+        //     latitude: origin.latitude,
+        //     longitude: origin.longitude,
+        //     latitudeDelta: latitudeDelta,
+        //     longitudeDelta: longitudeDelta
+        // }, 100)
+
+    }, [latitudeDelta, longitudeDelta]);
+
+    const onPressZoomOut = useCallback(() => {
+
+        // setLatitudeDelta(latitudeDelta - 0.00522);
+        // setLongitudeDelta(longitudeDelta - parameters.SCREEN_WIDTH / parameters.SCREEN_HEIGHT * 0.00522);
+
+        // _map?.current?.animateToRegion({
+        //     latitude: origin.latitude,
+        //     longitude: origin.longitude,
+        //     latitudeDelta: latitudeDelta,
+        //     longitudeDelta: longitudeDelta
+        // }, 100)
+    }, [latitudeDelta, longitudeDelta]);
+
 
     return (
         <View>
-            <MapView
-                initialRegion={{
+            <Animated
+                zoomControlEnabled={true}
+                zoomEnabled={true}
+                // initialCamera={{
+                //     center: {
+                //         latitude: origin.latitude,
+                //         longitude: origin.longitude
+                //     },
+                //     // heading: 0,
+                //     // pitch: 0,
+                //     // zoom: 15,
+                //     // altitude: 0,
+                // }}
+                minZoomLevel={5} // default => 0
+                maxZoomLevel={10} // default => 20
+                initialRegion={new AnimatedRegion({
                     latitude: origin.latitude,
                     longitude: origin.longitude,
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421,
-                }}
+                    latitudeDelta: latitudeDelta,
+                    longitudeDelta: longitudeDelta
+                })}
+
+                onMapReady={onMapReadyHandler}
+                showsCompass={true}
+                showsBuildings={true}
+                //showsTraffic={true}
+                showsIndoors={true}
+
+                followsUserLocation={true}
                 provider={PROVIDER_GOOGLE}
                 style={styles.map}
                 customMapStyle={mapStyle}
                 ref={_map}
                 showsUserLocation={true}
                 showsMyLocationButton={true}
-                showsIndoors
                 loadingEnabled
+                onRegionChange={region => {
+                    console.log('MapComponent onRegionChange region ', region)
+                }}
             >
-                {props?.userOrigin.latitude != null &&
-                    <MapView.Marker coordinate={props.userOrigin} anchor={{ x: 0.5, y: 0.5 }} >
-                        <Image
-                            source={require('../../assets/location.png')}
-                            style={styles.markerOrigin2}
-                            resizeMode="cover"
+                {origin.latitude != null &&
+                    <MapView.Marker
+                        name="origin"
+                        coordinate={props.userOrigin}
+                        anchor={{ x: 0.5, y: 0.5 }} >
+                        <Icon
+                            name="location-on"
+                            type="material"
+                            color={colors.darkred}
+                            size={50}
                         />
                     </MapView.Marker>
                 }
-                {props?.userDestination.latitude != null &&
-                    <MapView.Marker coordinate={props.userDestination} anchor={{ x: 0.5, y: 0.5 }} >
-                        <Image
-                            source={require('../../assets/location.png')}
-                            style={styles.markerDestination}
-                            resizeMode="cover"
+                {destination.latitude != null &&
+                    <MapView.Marker
+                        name="destination"
+                        coordinate={props.userDestination}
+                        anchor={{ x: 0.5, y: 0.5 }} >
+                        <Icon
+                            name="location-on"
+                            type="material"
+                            color={colors.lightgreen}
+                            size={50}
                         />
                     </MapView.Marker>
                 }
-                {props?.userDestination.latitude !== null &&
+                {destination.latitude !== null &&
                     <MapViewDirections
-                        origin={props?.userOrigin}
-                        destination={props?.userDestination}
+                        origin={origin}
+                        destination={destination}
                         apikey={GOOGLE_MAPS_APIKEY}
-                        strokeWidth={4}
-                        strokeColor={colors.black}
+                        strokeWidth={3}
+                        strokeColor={colors.blue}
                     />
                 }
 
-                <MapViewDirections
+                {/* <MapViewDirections
                     origin={origin}
                     destination={destination}
-                    //apikey={GOOGLE_MAPS_APIKEY}
-                />
+                    apikey={GOOGLE_MAPS_APIKEY}
+                /> */}
 
-            </MapView>
-        </View>
+            </Animated>
+            <TouchableOpacity
+                style={styles.zoomIn}
+                onPress={() => onPressZoomIn()}
+            >
+                <Icon
+                    name='add'
+                    color={colors.white}
+                    size={30}
+                />
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.zoomOut}
+                onPress={() => onPressZoomOut()}
+            >
+                <Icon
+                    name="remove"
+                    color={colors.white}
+                    size={30}
+                />
+            </TouchableOpacity>
+        </View >
     )
 }
 
@@ -80,6 +187,28 @@ const styles = StyleSheet.create({
     map: {
         height: "100%",
         width: "100%"
+    },
+    zoomIn: {
+        position: 'absolute',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 40,
+        width: 40,
+        borderRadius: 30,
+        bottom: 300,
+        left: 10,
+        backgroundColor: colors.black,
+    },
+    zoomOut: {
+        position: 'absolute',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 40,
+        width: 40,
+        borderRadius: 30,
+        bottom: 250,
+        left: 10,
+        backgroundColor: colors.black,
     },
     markerWrapOrigin: {
         //  alignItems: "center",

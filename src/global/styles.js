@@ -11,7 +11,11 @@ import { getStatusBarHeight } from 'react-native-status-bar-height';
 //console.log(getStatusBarHeight(true));
 
 export const colors = {
+    darkred: '#e74646',
     buttons: "#ff8c52",
+    red:"#ff0000",
+    green:"#00ff00",
+    orange:"#ffa500",
     grey: "#bebebe",
     grey1: '#43484d',
     grey2: '#5e6977',

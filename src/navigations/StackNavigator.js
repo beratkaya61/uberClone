@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import RequestScreen from '../screens/RequestScreen';
+import DestinationScreen from '../screens/DestinationScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,6 +23,13 @@ export default function StackNavigator() {
                     headerShown: false
                 }}
             />
+            <Stack.Screen
+                name="Destination"
+                component={DestinationScreen}
+                options={{
+                    headerShown: false
+                }}
+            />
         </Stack.Navigator>
-    )
-}
+    );
+}   
