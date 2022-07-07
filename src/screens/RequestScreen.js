@@ -53,6 +53,13 @@ const RequestScreen = ({ route, navigation }) => {
         longitude: destinationLocation.longitude,
     });
 
+    // useEffect(() => {
+    //     console.log('route.params.state : ', route.params.state)
+    //     if (route.params.state === -1) {
+    //         handleClosePress();
+    //     }
+    // }, [])
+
     //if currentLocation and destinationLocation that saved to context is changed, update the state
     useEffect(() => {
         setUserCurrentLocation({
@@ -228,7 +235,10 @@ const RequestScreen = ({ route, navigation }) => {
                     <View>
                         <TouchableOpacity
                             style={styles.fromWhereContainer}
-                            onPress={() => navigation.navigate("Destination")}>
+                            onPress={() => {
+                                handleClosePress();
+                                navigation.navigate("Destination")
+                            }}>
                             <Text style={styles.fromWhereText}>{currentLocation.address ? currentLocation.address : 'From where'}</Text>
                         </TouchableOpacity>
 

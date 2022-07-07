@@ -6,6 +6,7 @@ import MapViewDirections from 'react-native-maps-directions';
 import { GOOGLE_MAPS_APIKEY } from '../global/data';
 import { mapStyle } from '../global/mapStyle';
 import { colors, parameters } from '../global/styles';
+import { getTravelTime, haversine } from '../global/util';
 
 
 const MapComponent = (props) => {
@@ -71,6 +72,54 @@ const MapComponent = (props) => {
         // }, 100)
     }, [latitudeDelta, longitudeDelta]);
 
+    const renderDistanceBetweenTwoLocation = useCallback(() => {
+        if (origin.latitude !== null && destination.latitude !== null) {
+            const distance = haversine(origin, destination);
+            return (
+                <View style={styles.distanceContainer}>
+                    <Icon
+                        name="location-on"
+                        type="material"
+                        color={colors.grey1}
+                        size={20}
+                    />
+                    <Text
+                        style={{
+                            fontSize: 12,
+                            fontWeight: '700',
+                            color: colors.black
+                        }}>
+                        {'Distance: '} {distance} {'km'}
+                    </Text>
+                </View>
+            )
+        }
+    }, [origin, destination]);
+
+    const renderTravelTime = useCallback(() => {
+        if (origin.latitude !== null && destination.latitude !== null) {
+            const time = getTravelTime(origin, destination);
+            return (
+                <View style={styles.travelTimeContainer}>
+                    <Icon
+                        name="timer"
+                        type="material"
+                        color={colors.grey1}
+                        size={20}
+                    />
+                    <Text
+                        style={{
+                            fontSize: 12,
+                            fontWeight: '700',
+                            color: colors.black
+                        }}>
+                        {'Traveling time: '} {time}
+                    </Text>
+                </View>
+            )
+        }
+    }, [origin, destination]);
+
 
     return (
         <View>
@@ -96,7 +145,10 @@ const MapComponent = (props) => {
                     longitudeDelta: longitudeDelta
                 })}
 
-                onMapReady={onMapReadyHandler}
+                onMapReady={(result) => {
+                    console.log('onMapReady result ', result)
+                    onMapReadyHandler()
+                }}
                 showsCompass={true}
                 showsBuildings={true}
                 //showsTraffic={true}
@@ -177,13 +229,51 @@ const MapComponent = (props) => {
                     size={30}
                 />
             </TouchableOpacity>
-        </View >
+
+            {/*distance and traveling time between two location */}
+            {renderDistanceBetweenTwoLocation(origin, destination)}
+            {renderTravelTime(origin, destination)}
+        </View>
     )
 }
 
 export default MapComponent
 
 const styles = StyleSheet.create({
+    distanceContainer: {
+        position: 'absolute',
+        top: 10,
+        left: 10,
+        backgroundColor: colors.white,
+        padding: 5,
+        borderRadius: 10,
+        elevation: 5,
+        shadowColor: colors.black,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 2,
+        zIndex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
+    travelTimeContainer: {
+        position: 'absolute',
+        top: 50,
+        right: 10,
+        backgroundColor: colors.white,
+        padding: 5,
+        borderRadius: 10,
+        elevation: 5,
+        shadowColor: colors.black,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5,
+        shadowRadius: 2,
+        zIndex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+    },
     map: {
         height: "100%",
         width: "100%"

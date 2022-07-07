@@ -156,7 +156,6 @@ const DestinationScreen = ({ navigation }) => {
                                 name: details.name
                             },
                         })
-
                         navigation.navigate("Request", { state: -1 })
                     }}
 
